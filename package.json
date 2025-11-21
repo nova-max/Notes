@@ -1,6 +1,6 @@
 {
     "name": "notely-web",
-    "private": true,
+    "homepage": "https://nova-max.github.io/AInotes",
     "version": "0.0.0",
     "type": "module",
     "scripts": {
