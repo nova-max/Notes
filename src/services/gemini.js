@@ -11,7 +11,8 @@ export const analyzeNote = async (noteContent) => {
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // Using gemini-pro as it is the stable model for text generation
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const prompt = `
       Analyze the following note and provide a structured summary.
