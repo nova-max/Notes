@@ -1,8 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Access API key from environment variables (Vite)
-// Fallback to the provided key if .env fails
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCJkG2owhEaBYciVlWYCrk6JBExjN8Djlw";
+// Using the specific key provided by the user
+const API_KEY = "AIzaSyCJkG2owhEaBYciVlWYCrk6JBExjN8Djlw";
 
 export const analyzeNote = async (noteContent) => {
     if (!API_KEY) {
@@ -11,8 +10,8 @@ export const analyzeNote = async (noteContent) => {
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        // Using gemini-pro as it is the stable model for text generation
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        // Trying gemini-1.5-flash again as it is the current standard
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
       Analyze the following note and provide a structured summary.
