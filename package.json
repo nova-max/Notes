@@ -1,5 +1,5 @@
 {
-    "name": "app-notas",
+    "name": "notely-web",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -10,29 +10,23 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@google/generative-ai": "^0.24.1",
-        "@react-oauth/google": "^0.12.1",
-        "clsx": "^2.1.1",
-        "dexie": "^4.0.7",
-        "dexie-react-hooks": "^1.1.7",
-        "gapi-script": "^1.2.0",
-        "lucide-react": "^0.395.0",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "react-router-dom": "^6.23.1",
-        "tailwind-merge": "^2.3.0"
+        "date-fns": "^4.1.0",
+        "firebase": "^10.7.1",
+        "framer-motion": "^10.16.16",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-icons": "^4.12.0",
+        "react-markdown": "^10.1.0",
+        "react-router-dom": "^6.21.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.3",
-        "@types/react-dom": "^18.3.0",
-        "@vitejs/plugin-react": "^4.3.1",
-        "autoprefixer": "^10.4.19",
-        "eslint": "^8.57.0",
-        "eslint-plugin-react": "^7.34.2",
-        "eslint-plugin-react-hooks": "^4.6.2",
-        "eslint-plugin-react-refresh": "^0.4.7",
-        "postcss": "^8.4.38",
-        "tailwindcss": "^3.4.4",
-        "vite": "^5.3.1"
+        "@types/react": "^18.2.43",
+        "@types/react-dom": "^18.2.17",
+        "@vitejs/plugin-react": "^4.2.1",
+        "eslint": "^8.55.0",
+        "eslint-plugin-react": "^7.33.2",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.5",
+        "vite": "^5.0.8"
     }
 }
