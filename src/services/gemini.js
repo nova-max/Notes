@@ -1,11 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Access API key from environment variables (Vite)
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// Fallback to the provided key if .env fails
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCJkG2owhEaBYciVlWYCrk6JBExjN8Djlw";
 
 export const analyzeNote = async (noteContent) => {
     if (!API_KEY) {
-        throw new Error("Missing API Key. Please add VITE_GEMINI_API_KEY to your .env file.");
+        throw new Error("Missing API Key.");
     }
 
     try {
