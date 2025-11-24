@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { useDriveBackup } from '../hooks/useDriveBackup';
+import { useColorPalette } from '../hooks/useColorPalette';
 
 export function SettingsModal({ isOpen, onClose, categories, onAddCategory, onDeleteCategory, theme, notes }) {
     const [newCategory, setNewCategory] = useState({ label: '', icon: '📁' });
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const { uploadBackup, getLastBackupInfo, isBackingUp, backupStatus, hasAccessToken } = useDriveBackup();
+    const { primaryColor, updatePrimaryColor } = useColorPalette();
     const [lastBackupInfo, setLastBackupInfo] = useState(null);
 
     const emojiList = ['📁', '📂', '📚', '📖', '📝', '✨', '🎯', '🎨', '🏃', '💻', '🎵', '🎮', '📱', '🏠', '🌟', '💎', '🔥', '⚡', '🌈', '🎪'];
@@ -37,10 +39,11 @@ export function SettingsModal({ isOpen, onClose, categories, onAddCategory, onDe
     };
 
     const customCategories = categories.filter(c => !c.isDefault);
+    const presetColors = ['#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content glass" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-content glass" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
                 <div className="editor-header">
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-color)' }}>
                         ⚙️ Configuración
@@ -51,17 +54,67 @@ export function SettingsModal({ isOpen, onClose, categories, onAddCategory, onDe
                 </div>
 
                 <div className="editor-body">
-                    {/* Theme Section */}
+                    {/* Theme & Color Section */}
                     <div style={{ marginBottom: '2rem' }}>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', color: 'var(--text-color)' }}>
                             🎨 Apariencia
                         </h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>
                             Tema actual: <strong>{theme === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}</strong>
                         </p>
-                        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
-                            Usa el botón en la barra lateral para cambiar el tema.
-                        </p>
+
+                        {/* Color Picker */}
+                        <div style={{ marginTop: '1rem' }}>
+                            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
+                                Color Principal
+                            </label>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <input
+                                    type="color"
+                                    value={primaryColor}
+                                    onChange={(e) => updatePrimaryColor(e.target.value)}
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        border: '3px solid var(--glass-border)',
+                                        borderRadius: '12px',
+                                        cursor: 'pointer'
+                                    }}
+                                />
+                                <div style={{ flex: 1, minWidth: '200px' }}>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-color)' }}>
+                                        <strong>{primaryColor?.toUpperCase()}</strong>
+                                    </p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                                        La paleta se actualiza automáticamente
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Preset Colors */}
+                            <div style={{ marginTop: '1rem' }}>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                    Colores sugeridos:
+                                </p>
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                    {presetColors.map(color => (
+                                        <button
+                                            key={color}
+                                            onClick={() => updatePrimaryColor(color)}
+                                            style={{
+                                                width: '40px',
+                                                height: '40px',
+                                                borderRadius: '8px',
+                                                border: primaryColor === color ? '3px solid var(--text-color)' : '2px solid var(--glass-border)',
+                                                background: color,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Backup Section */}
@@ -79,7 +132,7 @@ export function SettingsModal({ isOpen, onClose, categories, onAddCategory, onDe
                                     className="btn btn-primary"
                                     onClick={handleBackup}
                                     disabled={isBackingUp}
-                                    style={{ width: '100%' }}
+                                    style={{ width: '100%', opacity: isBackingUp ? 0.6 : 1 }}
                                 >
                                     {isBackingUp ? '⏳ Creando respaldo...' : '💾 Crear Copia de Seguridad'}
                                 </button>
@@ -99,14 +152,7 @@ export function SettingsModal({ isOpen, onClose, categories, onAddCategory, onDe
                                         marginBottom: '1rem'
                                     }}
                                 >
-                                    <p style={{
-                                        fontSize: '0.875rem',
-                                        color: backupStatus.success === true
-                                            ? 'var(--success-color)'
-                                            : backupStatus.success === false
-                                                ? 'var(--danger-color)'
-                                                : 'var(--text-secondary)'
-                                    }}>
+                                    <p style={{ fontSize: '0.875rem', color: backupStatus.success === true ? 'var(--success-color)' : backupStatus.success === false ? 'var(--danger-color)' : 'var(--text-secondary)' }}>
                                         {backupStatus.message}
                                     </p>
                                 </div>
@@ -126,7 +172,7 @@ export function SettingsModal({ isOpen, onClose, categories, onAddCategory, onDe
 
                     {/* Categories Section */}
                     <div style={{ marginBottom: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-color)' }}>
                                 📁 Carpetas Personalizadas
                             </h3>
