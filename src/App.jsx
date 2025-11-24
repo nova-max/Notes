@@ -156,6 +156,7 @@ function AppContent() {
                 onAddCategory={addCategory}
                 onDeleteCategory={deleteCategory}
                 theme={theme}
+                notes={notes}
             />
         </div>
     );
