@@ -3,11 +3,14 @@ import { Sidebar } from './components/Sidebar';
 import { NoteCard } from './components/NoteCard';
 import { NoteEditor } from './components/NoteEditor';
 import { SearchBar } from './components/SearchBar';
+import { Login } from './components/Login';
 import { useNotes } from './hooks/useNotes';
-import { FileText } from 'lucide-react';
+import { useAuth, AuthProvider } from './context/AuthContext';
+import { FileText, Loader2 } from 'lucide-react';
 
-function App() {
-    const { notes, addNote, updateNote, deleteNote } = useNotes();
+function AppContent() {
+    const { currentUser } = useAuth();
+    const { notes, addNote, updateNote, deleteNote, loading } = useNotes();
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -20,8 +23,8 @@ function App() {
         if (activeTab === 'favorites') {
             filtered = filtered.filter(n => n.isFavorite);
         } else if (activeTab === 'recent') {
-            // Already sorted by date in useNotes, but let's ensure
-            filtered = [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            // Already sorted by date in useNotes
+            filtered = [...filtered].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         }
 
         // Filter by search
@@ -36,6 +39,18 @@ function App() {
 
         return filtered;
     }, [notes, activeTab, searchQuery]);
+
+    if (!currentUser) {
+        return <Login />;
+    }
+
+    if (loading) {
+        return (
+            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <Loader2 className="animate-spin" size={48} />
+            </div>
+        );
+    }
 
     const handleNewNote = () => {
         setEditingNote(null);
@@ -115,6 +130,14 @@ function App() {
                 />
             )}
         </div>
+    );
+}
+
+function App() {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
     );
 }
 
