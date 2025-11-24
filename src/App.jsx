@@ -4,19 +4,23 @@ import { NoteCard } from './components/NoteCard';
 import { NoteEditor } from './components/NoteEditor';
 import { SearchBar } from './components/SearchBar';
 import { Login } from './components/Login';
+import { SettingsModal } from './components/SettingsModal';
 import { useNotes } from './hooks/useNotes';
 import { useAuth, AuthProvider } from './context/AuthContext';
 import { useTheme } from './hooks/useTheme';
+import { useCategories } from './hooks/useCategories';
 import { FileText, Loader2 } from 'lucide-react';
 
 function AppContent() {
     const { currentUser } = useAuth();
     const { notes, addNote, updateNote, deleteNote, loading } = useNotes();
     const { theme } = useTheme();
+    const { categories, addCategory, deleteCategory } = useCategories();
     const [activeTab, setActiveTab] = useState('all');
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [editingNote, setEditingNote] = useState(null);
 
     const filteredNotes = useMemo(() => {
@@ -93,7 +97,9 @@ function AppContent() {
                 setActiveTab={setActiveTab}
                 activeCategory={activeCategory}
                 setActiveCategory={setActiveCategory}
+                categories={categories}
                 onNewNote={handleNewNote}
+                onOpenSettings={() => setIsSettingsOpen(true)}
             />
 
             <main className="main-content">
@@ -142,6 +148,15 @@ function AppContent() {
                     onSave={handleSaveNote}
                 />
             )}
+
+            <SettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                categories={categories}
+                onAddCategory={addCategory}
+                onDeleteCategory={deleteCategory}
+                theme={theme}
+            />
         </div>
     );
 }
@@ -155,3 +170,4 @@ function App() {
 }
 
 export default App;
+

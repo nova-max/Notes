@@ -3,7 +3,7 @@ import { LayoutGrid, Star, Clock, Settings, Plus, LogOut, Folder, Sun, Moon } fr
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 
-export function Sidebar({ activeTab, setActiveTab, onNewNote, activeCategory, setActiveCategory }) {
+export function Sidebar({ activeTab, setActiveTab, onNewNote, activeCategory, setActiveCategory, categories, onOpenSettings }) {
     const { currentUser, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
 
@@ -11,14 +11,6 @@ export function Sidebar({ activeTab, setActiveTab, onNewNote, activeCategory, se
         { id: 'all', icon: LayoutGrid, label: 'Todas las Notas' },
         { id: 'favorites', icon: Star, label: 'Favoritos' },
         { id: 'recent', icon: Clock, label: 'Recientes' },
-    ];
-
-    const categories = [
-        { id: 'general', label: '📋 General', icon: '📋' },
-        { id: 'personal', label: '👤 Personal', icon: '👤' },
-        { id: 'trabajo', label: '💼 Trabajo', icon: '💼' },
-        { id: 'ideas', label: '💡 Ideas', icon: '💡' },
-        { id: 'proyectos', label: '🚀 Proyectos', icon: '🚀' },
     ];
 
     return (
@@ -81,7 +73,7 @@ export function Sidebar({ activeTab, setActiveTab, onNewNote, activeCategory, se
                             style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
                         >
                             <span>{cat.icon}</span>
-                            <span>{cat.label.split(' ')[1]}</span>
+                            <span>{cat.label}</span>
                         </div>
                     ))}
                 </div>
@@ -92,7 +84,7 @@ export function Sidebar({ activeTab, setActiveTab, onNewNote, activeCategory, se
                     {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                     <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
                 </div>
-                <div className="nav-item">
+                <div className="nav-item" onClick={onOpenSettings}>
                     <Settings size={20} />
                     <span>Configuración</span>
                 </div>
