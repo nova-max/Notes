@@ -1,5 +1,6 @@
 import React from 'react';
-import { Trash2, Edit2, Star } from 'lucide-react';
+import { Trash2, Star, Calendar, CheckSquare } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 export function NoteCard({ note, onEdit, onDelete, onToggleFavorite, index }) {
     const date = new Date(note.createdAt).toLocaleDateString('es-ES', {
@@ -8,9 +9,20 @@ export function NoteCard({ note, onEdit, onDelete, onToggleFavorite, index }) {
         year: 'numeric'
     });
 
+    const hasReminder = note.reminder && new Date(note.reminder) > new Date();
+    const reminderDate = hasReminder ? new Date(note.reminder).toLocaleDateString('es-ES', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) : null;
+
+    const completedTodos = note.todos?.filter(t => t.completed).length || 0;
+    const totalTodos = note.todos?.length || 0;
+
     return (
         <div
-            className={`note-card animate-fade-in`}
+            className={`note-card animate-fade-in ${hasReminder ? 'has-reminder' : ''}`}
             style={{ animationDelay: `${index * 0.05}s` }}
             onClick={() => onEdit(note)}
         >
@@ -26,11 +38,40 @@ export function NoteCard({ note, onEdit, onDelete, onToggleFavorite, index }) {
             </div>
 
             <h3 className="note-title">{note.title || 'Sin título'}</h3>
-            <p className="note-preview">{note.content || 'Sin contenido...'}</p>
 
+            <div className="note-preview">
+                <ReactMarkdown>{note.content?.substring(0, 200) || 'Sin contenido...'}</ReactMarkdown>
+            </div>
+
+            {/* Categoría */}
+            {note.category && note.category !== 'general' && (
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <span className="category-badge" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
+                        📁 {note.category}
+                    </span>
+                </div>
+            )}
+
+            {/* Tareas */}
+            {totalTodos > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <CheckSquare size={16} />
+                    <span>{completedTodos}/{totalTodos} completadas</span>
+                </div>
+            )}
+
+            {/* Recordatorio */}
+            {hasReminder && (
+                <div className="reminder-badge">
+                    <Calendar size={14} />
+                    {reminderDate}
+                </div>
+            )}
+
+            {/* Etiquetas */}
             <div className="note-tags">
                 {note.tags && note.tags.map(tag => (
-                    <span key={tag} className="tag">#{tag}</span>
+                    <span key={tag} className="tag">{tag}</span>
                 ))}
             </div>
 
@@ -38,15 +79,16 @@ export function NoteCard({ note, onEdit, onDelete, onToggleFavorite, index }) {
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '0.5rem',
-                marginTop: '1rem',
-                opacity: 0.5,
-                transition: 'opacity 0.2s'
-            }}
-                className="card-actions"
-            >
+                marginTop: '1rem'
+            }}>
                 <button
                     className="btn-icon"
-                    onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('¿Estás seguro de eliminar esta nota?')) {
+                            onDelete(note.id);
+                        }
+                    }}
                     title="Eliminar"
                 >
                     <Trash2 size={16} />

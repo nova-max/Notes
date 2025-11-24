@@ -1,14 +1,24 @@
 import React from 'react';
-import { LayoutGrid, Star, Clock, Settings, Plus, LogOut } from 'lucide-react';
+import { LayoutGrid, Star, Clock, Settings, Plus, LogOut, Folder, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../hooks/useTheme';
 
-export function Sidebar({ activeTab, setActiveTab, onNewNote }) {
+export function Sidebar({ activeTab, setActiveTab, onNewNote, activeCategory, setActiveCategory }) {
     const { currentUser, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     const menuItems = [
         { id: 'all', icon: LayoutGrid, label: 'Todas las Notas' },
         { id: 'favorites', icon: Star, label: 'Favoritos' },
         { id: 'recent', icon: Clock, label: 'Recientes' },
+    ];
+
+    const categories = [
+        { id: 'general', label: '📋 General', icon: '📋' },
+        { id: 'personal', label: '👤 Personal', icon: '👤' },
+        { id: 'trabajo', label: '💼 Trabajo', icon: '💼' },
+        { id: 'ideas', label: '💡 Ideas', icon: '💡' },
+        { id: 'proyectos', label: '🚀 Proyectos', icon: '🚀' },
     ];
 
     return (
@@ -36,7 +46,7 @@ export function Sidebar({ activeTab, setActiveTab, onNewNote }) {
                 Nueva Nota
             </button>
 
-            <nav style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <nav style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {menuItems.map((item) => (
                     <div
                         key={item.id}
@@ -49,12 +59,44 @@ export function Sidebar({ activeTab, setActiveTab, onNewNote }) {
                 ))}
             </nav>
 
+            <div style={{ marginTop: '1.5rem' }}>
+                <div style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: 'var(--text-secondary)',
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                }}>
+                    <Folder size={16} />
+                    Carpetas
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {categories.map((cat) => (
+                        <div
+                            key={cat.id}
+                            className={`nav-item ${activeCategory === cat.id ? 'active' : ''}`}
+                            onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
+                            style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
+                        >
+                            <span>{cat.icon}</span>
+                            <span>{cat.label.split(' ')[1]}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="nav-item" onClick={toggleTheme}>
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
+                </div>
                 <div className="nav-item">
                     <Settings size={20} />
                     <span>Configuración</span>
                 </div>
-                <div className="nav-item" onClick={logout} style={{ color: '#ef4444' }}>
+                <div className="nav-item" onClick={logout} style={{ color: 'var(--danger-color)' }}>
                     <LogOut size={20} />
                     <span>Cerrar Sesión</span>
                 </div>

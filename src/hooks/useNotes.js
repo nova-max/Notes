@@ -26,18 +26,14 @@ export function useNotes() {
             return;
         }
 
-        // Query notes for the current user
         const q = query(
             collection(db, 'Notas'),
             where('uid', '==', currentUser.uid)
-            // Note: Composite index might be required for orderBy with where clause
-            // If it fails, we can sort client-side or create the index in Firebase Console
         );
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const notesData = querySnapshot.docs.map(doc => {
                 const data = doc.data();
-                // Map Firestore fields to App fields
                 return {
                     id: doc.id,
                     title: data.Titulo,
@@ -45,12 +41,13 @@ export function useNotes() {
                     tags: data.Etiquetas || [],
                     isFavorite: data.Fijado || false,
                     createdAt: data.FechaCreacion,
-                    // Keep original data too just in case
+                    category: data.Categoria || 'general',
+                    reminder: data.Recordatorio || '',
+                    todos: data.Tareas || [],
                     ...data
                 };
             });
 
-            // Sort client-side to avoid index issues for now
             notesData.sort((a, b) => {
                 const dateA = new Date(a.createdAt || 0);
                 const dateB = new Date(b.createdAt || 0);
@@ -75,8 +72,11 @@ export function useNotes() {
                 Contenido: note.content,
                 Etiquetas: note.tags || [],
                 Fijado: note.isFavorite || false,
+                Categoria: note.category || 'general',
+                Recordatorio: note.reminder || '',
+                Tareas: note.todos || [],
                 FechaCreacion: now,
-                Fecha: now // Keeping consistent with screenshot
+                Fecha: now
             });
         } catch (error) {
             console.error("Error adding note: ", error);
@@ -89,12 +89,14 @@ export function useNotes() {
         try {
             const noteRef = doc(db, 'Notas', id);
 
-            // Prepare update object mapping back to Firestore fields
             const updateData = {};
             if (updatedNote.title !== undefined) updateData.Titulo = updatedNote.title;
             if (updatedNote.content !== undefined) updateData.Contenido = updatedNote.content;
             if (updatedNote.tags !== undefined) updateData.Etiquetas = updatedNote.tags;
             if (updatedNote.isFavorite !== undefined) updateData.Fijado = updatedNote.isFavorite;
+            if (updatedNote.category !== undefined) updateData.Categoria = updatedNote.category;
+            if (updatedNote.reminder !== undefined) updateData.Recordatorio = updatedNote.reminder;
+            if (updatedNote.todos !== undefined) updateData.Tareas = updatedNote.todos;
 
             await updateDoc(noteRef, updateData);
         } catch (error) {

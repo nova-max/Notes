@@ -6,12 +6,15 @@ import { SearchBar } from './components/SearchBar';
 import { Login } from './components/Login';
 import { useNotes } from './hooks/useNotes';
 import { useAuth, AuthProvider } from './context/AuthContext';
+import { useTheme } from './hooks/useTheme';
 import { FileText, Loader2 } from 'lucide-react';
 
 function AppContent() {
     const { currentUser } = useAuth();
     const { notes, addNote, updateNote, deleteNote, loading } = useNotes();
+    const { theme } = useTheme();
     const [activeTab, setActiveTab] = useState('all');
+    const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [editingNote, setEditingNote] = useState(null);
@@ -19,11 +22,15 @@ function AppContent() {
     const filteredNotes = useMemo(() => {
         let filtered = notes;
 
+        // Filter by category
+        if (activeCategory) {
+            filtered = filtered.filter(n => n.category === activeCategory);
+        }
+
         // Filter by tab
         if (activeTab === 'favorites') {
             filtered = filtered.filter(n => n.isFavorite);
         } else if (activeTab === 'recent') {
-            // Already sorted by date in useNotes
             filtered = [...filtered].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         }
 
@@ -33,12 +40,13 @@ function AppContent() {
             filtered = filtered.filter(n =>
                 (n.title && n.title.toLowerCase().includes(query)) ||
                 (n.content && n.content.toLowerCase().includes(query)) ||
-                (n.tags && n.tags.some(t => t.toLowerCase().includes(query)))
+                (n.tags && n.tags.some(t => t.toLowerCase().includes(query))) ||
+                (n.category && n.category.toLowerCase().includes(query))
             );
         }
 
         return filtered;
-    }, [notes, activeTab, searchQuery]);
+    }, [notes, activeTab, activeCategory, searchQuery]);
 
     if (!currentUser) {
         return <Login />;
@@ -46,8 +54,9 @@ function AppContent() {
 
     if (loading) {
         return (
-            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                <Loader2 className="animate-spin" size={48} />
+            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
+                <Loader2 className="animate-spin" size={48} style={{ color: 'var(--accent-color)' }} />
+                <p style={{ color: 'var(--text-secondary)' }}>Cargando tus notas...</p>
             </div>
         );
     }
@@ -82,6 +91,8 @@ function AppContent() {
             <Sidebar
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
                 onNewNote={handleNewNote}
             />
 
@@ -89,8 +100,8 @@ function AppContent() {
                 <header className="header">
                     <SearchBar value={searchQuery} onChange={setSearchQuery} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <span style={{ color: 'var(--text-secondary)' }}>
-                            {filteredNotes.length} notas
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                            {filteredNotes.length} {filteredNotes.length === 1 ? 'nota' : 'notas'}
                         </span>
                     </div>
                 </header>
@@ -111,11 +122,13 @@ function AppContent() {
                 ) : (
                     <div className="empty-state animate-fade-in">
                         <div className="empty-icon">
-                            <FileText size={64} strokeWidth={1} />
+                            <FileText size={64} strokeWidth={1} style={{ color: 'var(--text-tertiary)' }} />
                         </div>
-                        <h2>No se encontraron notas</h2>
-                        <p>Crea una nueva nota para empezar o ajusta tu búsqueda.</p>
-                        <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={handleNewNote}>
+                        <h2 style={{ color: 'var(--text-color)', marginBottom: '0.5rem' }}>No hay notas aquí</h2>
+                        <p style={{ color: 'var(--text-secondary)' }}>
+                            {searchQuery ? 'No encontramos notas que coincidan con tu búsqueda.' : 'Crea tu primera nota para comenzar.'}
+                        </p>
+                        <button className="btn btn-primary" style={{ marginTop: '1.5rem' }} onClick={handleNewNote}>
                             Crear Nota
                         </button>
                     </div>
