@@ -1,0 +1,121 @@
+import React, { useState, useMemo } from 'react';
+import { Sidebar } from './components/Sidebar';
+import { NoteCard } from './components/NoteCard';
+import { NoteEditor } from './components/NoteEditor';
+import { SearchBar } from './components/SearchBar';
+import { useNotes } from './hooks/useNotes';
+import { FileText } from 'lucide-react';
+
+function App() {
+    const { notes, addNote, updateNote, deleteNote } = useNotes();
+    const [activeTab, setActiveTab] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const [editingNote, setEditingNote] = useState(null);
+
+    const filteredNotes = useMemo(() => {
+        let filtered = notes;
+
+        // Filter by tab
+        if (activeTab === 'favorites') {
+            filtered = filtered.filter(n => n.isFavorite);
+        } else if (activeTab === 'recent') {
+            // Already sorted by date in useNotes, but let's ensure
+            filtered = [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        // Filter by search
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(n =>
+                (n.title && n.title.toLowerCase().includes(query)) ||
+                (n.content && n.content.toLowerCase().includes(query)) ||
+                (n.tags && n.tags.some(t => t.toLowerCase().includes(query)))
+            );
+        }
+
+        return filtered;
+    }, [notes, activeTab, searchQuery]);
+
+    const handleNewNote = () => {
+        setEditingNote(null);
+        setIsEditorOpen(true);
+    };
+
+    const handleEditNote = (note) => {
+        setEditingNote(note);
+        setIsEditorOpen(true);
+    };
+
+    const handleSaveNote = (noteData) => {
+        if (editingNote) {
+            updateNote(editingNote.id, noteData);
+        } else {
+            addNote(noteData);
+        }
+    };
+
+    const toggleFavorite = (id) => {
+        const note = notes.find(n => n.id === id);
+        if (note) {
+            updateNote(id, { isFavorite: !note.isFavorite });
+        }
+    };
+
+    return (
+        <div className="app-container">
+            <Sidebar
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onNewNote={handleNewNote}
+            />
+
+            <main className="main-content">
+                <header className="header">
+                    <SearchBar value={searchQuery} onChange={setSearchQuery} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                            {filteredNotes.length} notas
+                        </span>
+                    </div>
+                </header>
+
+                {filteredNotes.length > 0 ? (
+                    <div className="notes-grid">
+                        {filteredNotes.map((note, index) => (
+                            <NoteCard
+                                key={note.id}
+                                index={index}
+                                note={note}
+                                onEdit={handleEditNote}
+                                onDelete={deleteNote}
+                                onToggleFavorite={toggleFavorite}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="empty-state animate-fade-in">
+                        <div className="empty-icon">
+                            <FileText size={64} strokeWidth={1} />
+                        </div>
+                        <h2>No se encontraron notas</h2>
+                        <p>Crea una nueva nota para empezar o ajusta tu búsqueda.</p>
+                        <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={handleNewNote}>
+                            Crear Nota
+                        </button>
+                    </div>
+                )}
+            </main>
+
+            {isEditorOpen && (
+                <NoteEditor
+                    note={editingNote}
+                    onClose={() => setIsEditorOpen(false)}
+                    onSave={handleSaveNote}
+                />
+            )}
+        </div>
+    );
+}
+
+export default App;
